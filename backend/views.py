@@ -1,8 +1,13 @@
 from rest_framework import viewsets
 from rest_framework.permissions import AllowAny
-from .models import Post, Image, User
-from .serializers import PostSerializer, UserSerializer
+from .models import Post, Image, User, Image, Comment
+from .serializers import PostSerializer, UserSerializer, CommentSerializer
 from .permissions import IsLoggedInUserOrAdmin, IsAdminUser
+
+class CommentViewSet(viewsets.ModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+
 
 
 class PostViewSet(viewsets.ModelViewSet):

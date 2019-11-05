@@ -52,8 +52,8 @@ class UserProfile(models.Model):
 
 class Image(models.Model):
     post = models.ForeignKey(
-        Post, related_name='images', on_delete=models.CASCADE)
-    image = models.ImageField(upload_to='post_images')
+        Post, on_delete=models.CASCADE)
+    image = models.FileField(upload_to='post_images')
 
     def __str__(self):
         return '%s' % (self.image)
