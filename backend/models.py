@@ -18,6 +18,9 @@ class Comment(models.Model):
     content = models.TextField()
     created = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return '%s - %s' % (self.author, self.content)
+
 
 class User(AbstractUser):
     username = models.CharField(max_length=30, blank=True, null=True)
@@ -33,7 +36,7 @@ class UserProfile(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile')
     nickname = models.CharField(max_length=30, null=True,unique=True)
-    profile_image = models.ImageField(null=True, blank=True)
+    profile_image = models.ImageField(null=True, blank=True, upload_to='profile_images')
     bio = models.TextField(null=True, blank=True)
     phone = models.CharField(max_length=30)
     followers = models.ManyToManyField("self", blank=True)

@@ -35,7 +35,7 @@ class PostSerializer(serializers.HyperlinkedModelSerializer):
         images_data = self.context.get('view').request.FILES
         post = Post.objects.create(
             created=validated_data.get('created'),
-            author=validated_data.get('author'),
+            author=self.context['request'].user,
             content=validated_data.get('content')
         )
         for image_data in images_data.values():
