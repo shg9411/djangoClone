@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-from .models import User, UserProfile, Comment
+from .models import User, UserProfile, Comment, Post
 
 
 class UserProfileInline(admin.StackedInline):
@@ -24,4 +24,8 @@ class UserAdmin(BaseUserAdmin):
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(Post)
+class PostAdmin(admin.ModelAdmin):
     pass

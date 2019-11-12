@@ -5,18 +5,18 @@ from django.utils.translation import ugettext_lazy as _
 
 
 class Post(models.Model):
-    created = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(auto_now=True)
     content = models.TextField()
     author = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+        settings.AUTH_USER_MODEL, blank=True, on_delete=models.CASCADE)
 
 
 class Comment(models.Model):
-    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, blank=True, on_delete=models.CASCADE)
     author = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+        settings.AUTH_USER_MODEL, blank=True, on_delete=models.CASCADE)
     content = models.TextField()
-    created = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return '%s - %s' % (self.author, self.content)
@@ -35,8 +35,9 @@ class User(AbstractUser):
 class UserProfile(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile')
-    nickname = models.CharField(max_length=30, null=True,unique=True)
-    profile_image = models.ImageField(null=True, blank=True, upload_to='profile_images')
+    nickname = models.CharField(max_length=30, null=True, unique=True)
+    profile_image = models.ImageField(
+        null=True, blank=True, upload_to='profile_images')
     bio = models.TextField(null=True, blank=True)
     phone = models.CharField(max_length=30)
     followers = models.ManyToManyField("self", blank=True)
@@ -51,6 +52,10 @@ class UserProfile(models.Model):
     @property
     def following_count(self):
         return self.following.all().count()
+
+    @property
+    def comment_count(self):
+        return self.comments.all().count()
 
 
 class Image(models.Model):

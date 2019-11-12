@@ -8,8 +8,9 @@ class ImageSerializer(serializers.ModelSerializer):
         model = Image
         fields = ('image',)
 
+
 class CommentSerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = Comment
         fields = '__all__'
@@ -19,17 +20,20 @@ class CommentSerializer(serializers.ModelSerializer):
             post=validated_data.get('post'),
             author=validated_data.get('author'),
             content=validated_data.get('content'),
-            created = validated_data.get('created')
+            created=validated_data.get('created')
         )
         return comment
 
+
 class PostSerializer(serializers.HyperlinkedModelSerializer):
     images = ImageSerializer(source='image_set', many=True, read_only=True)
-    comments = CommentSerializer(source='comment_set',many=True,read_only=True)
+    comments = CommentSerializer(
+        source='comment_set', many=True, read_only=True)
 
     class Meta:
         model = Post
-        fields = ('url','images','comments','images','created','content','author')
+        fields = ('id','images', 'comments', 'images',
+                  'created', 'content', 'author')
 
     def create(self, validated_data):
         images_data = self.context.get('view').request.FILES
@@ -39,7 +43,7 @@ class PostSerializer(serializers.HyperlinkedModelSerializer):
             content=validated_data.get('content')
         )
         for image_data in images_data.values():
-            Image.objects.create(post=post, image = image_data)
+            Image.objects.create(post=post, image=image_data)
         return post
 
 
@@ -104,5 +108,3 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         profile.save()
 
         return instance
-
-
