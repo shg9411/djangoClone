@@ -78,20 +78,18 @@ class CommentDetail(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-# 유저1이 유저2를 팔로우하면 유저2도 유저1을 팔로우하게되는 현상 발생중
+#symmetrical=False를 추가하면서 오류 해결
 class FollowUser(APIView):
     def post(self, request, user_id, format=None):
         userP = UserProfile.objects.get(user=request.user)
         try:
-            user_to_follow = UserProfile.objects.get(
-                user=User.objects.get(id=user_id))
+            user_to_follow = User.objects.get(id=user_id).profile
         except UserProfile.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         userP.following.add(user_to_follow)
         user_to_follow.followers.add(userP)
         return Response(status=status.HTTP_200_OK)
 
-# 팔로우와 같은 현상 발생
 
 
 class UnFollowUser(APIView):

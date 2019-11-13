@@ -55,8 +55,10 @@ class UserProfile(models.Model):
         null=True, blank=True, upload_to='profile_images')
     bio = models.TextField(null=True, blank=True)
     phone = models.CharField(max_length=30, null=True, blank=True)
-    followers = models.ManyToManyField("self", blank=True)
-    following = models.ManyToManyField("self", blank=True)
+    followers = models.ManyToManyField(
+        "self", related_name='follower', blank=True, symmetrical=False)
+    following = models.ManyToManyField(
+        "self", related_name='follow', blank=True, symmetrical=False)
     like_posts = models.ManyToManyField(
         Post, related_name='likes_post', blank=True)
 
