@@ -10,6 +10,15 @@ class Post(models.Model):
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL, blank=True, on_delete=models.CASCADE)
 
+    @property
+    def comment_count(self):
+        # return Comment.objects.filter(post=self).count()
+        return self.comment_set.all().count()
+
+    @property
+    def like_count(self):
+        return self.likes_post.all().count()
+
 
 class Comment(models.Model):
     post = models.ForeignKey(Post, blank=True, on_delete=models.CASCADE)
@@ -31,19 +40,25 @@ class User(AbstractUser):
     def __str__(self):
         return "{}".format(self.username)
 
+    @property
+    def post_count(self):
+        # return Post.objects.filter(author=self.user).count()
+        return self.post_set.all().count()
+
 
 class UserProfile(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile')
-    nickname = models.CharField(max_length=30, null=True, unique=True)
+    nickname = models.CharField(
+        max_length=30, null=True, blank=True, unique=True)
     profile_image = models.ImageField(
         null=True, blank=True, upload_to='profile_images')
     bio = models.TextField(null=True, blank=True)
-    phone = models.CharField(max_length=30)
+    phone = models.CharField(max_length=30, null=True, blank=True)
     followers = models.ManyToManyField("self", blank=True)
     following = models.ManyToManyField("self", blank=True)
-    like_posts = models.ManyToManyField(Post, blank=True)
-    like_comments = models.ManyToManyField(Comment, blank=True)
+    like_posts = models.ManyToManyField(
+        Post, related_name='likes_post', blank=True)
 
     @property
     def followers_count(self):
@@ -53,9 +68,8 @@ class UserProfile(models.Model):
     def following_count(self):
         return self.following.all().count()
 
-    @property
-    def comment_count(self):
-        return self.comments.all().count()
+    def __str__(self):
+        return self.user.username
 
 
 class Image(models.Model):

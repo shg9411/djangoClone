@@ -1,6 +1,6 @@
 from rest_framework import viewsets
 from rest_framework.permissions import AllowAny
-from .models import Post, Image, User, Image, Comment
+from .models import Post, Image, User, Image, Comment, UserProfile
 from .serializers import PostSerializer, UserSerializer, CommentSerializer
 from .permissions import IsLoggedInUserOrAdmin, IsAdminUser
 from django.http import Http404
@@ -76,3 +76,92 @@ class CommentDetail(APIView):
         comment = self.get_object(post_pk, comment_pk)
         comment.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# 유저1이 유저2를 팔로우하면 유저2도 유저1을 팔로우하게되는 현상 발생중
+class FollowUser(APIView):
+    def post(self, request, user_id, format=None):
+        userP = UserProfile.objects.get(user=request.user)
+        try:
+            user_to_follow = UserProfile.objects.get(
+                user=User.objects.get(id=user_id))
+        except UserProfile.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        userP.following.add(user_to_follow)
+        user_to_follow.followers.add(userP)
+        return Response(status=status.HTTP_200_OK)
+
+# 팔로우와 같은 현상 발생
+
+
+class UnFollowUser(APIView):
+    def post(self, request, user_id, format=None):
+        userP = UserProfile.objects.get(user=request.user)
+        try:
+            user_to_unfollow = UserProfile.objects.get(
+                user=User.objects.get(id=user_id))
+        except UserProfile.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        userP.following.remove(user_to_unfollow)
+        user_to_unfollow.followers.remove(userP)
+        return Response(status=status.HTTP_200_OK)
+
+
+class LikePost(APIView):
+    def get(self, request, post_id, format=None):
+        likes = Post.objects.get(id=post_id)
+        like_ids = likes.likes_post.all()
+        users = User.objects.filter(id__in=like_ids)
+        serializer = UserSerializer(
+            users, many=True, context={'request': request})
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request, post_id, format=None):
+        user = request.user
+
+        try:
+            get_post = Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            already_like = UserProfile.objects.get(
+                user=user,
+                like_posts=get_post
+            )
+            return Response(status=status.HTTP_304_NOT_MODIFIED)
+
+        except UserProfile.DoesNotExist:
+            new_like = UserProfile.objects.get(
+                user=user
+            )
+            new_like.like_posts.add(get_post)
+            new_like.save()
+            return Response(status=status.HTTP_201_CREATED)
+
+
+class UnLikePost(APIView):
+
+    def delete(self, request, post_id, format=None):
+        user = request.user
+        try:
+            already_like = UserProfile.objects.get(
+                user=user,
+                like_posts=post_id
+            )
+            already_like.like_posts.remove(post_id)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except UserProfile.DoesNotExist:
+            return Response(status=status.HTTP_304_NOT_MODIFIED)
+
+
+class Search(APIView):
+    def get(self, request, format=None):
+        username = request.query_params.get('username', None)
+        if username is not None:
+            users = User.objects.filter(username__istartswith=username)
+            serializer = UserSerializer(
+                users, many=True, context={'request': request})
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)

@@ -10,6 +10,13 @@ router.register('users', views.UserViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('search/', views.Search.as_view()),
+    #search user by username
+    path('users/<int:user_id>/follow/', views.FollowUser.as_view()),
+    path('users/<int:user_id>/unfollow/', views.UnFollowUser.as_view()),
     path('posts/<int:pk>/comments/', views.CommentList.as_view()),
-    path('posts/<int:post_pk>/comments/<int:comment_pk>/', views.CommentDetail.as_view()),
+    path('posts/<int:post_pk>/comments/<int:comment_pk>/',
+         views.CommentDetail.as_view()),
+    path('posts/<int:post_id>/likes/', views.LikePost.as_view()),
+    path('posts/<int:post_id>/unlikes/', views.UnLikePost.as_view()),
 ]
