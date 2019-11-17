@@ -61,6 +61,7 @@ class UserProfile(models.Model):
         "self", related_name='follow', blank=True, symmetrical=False)
     like_posts = models.ManyToManyField(
         Post, related_name='likes_post', blank=True)
+    is_private = models.BooleanField(default=False)
 
     @property
     def followers_count(self):

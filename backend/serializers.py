@@ -54,12 +54,14 @@ class UserProfileSerializer(serializers.ModelSerializer):
     following_count = serializers.ReadOnlyField()
     is_self = serializers.SerializerMethodField()
     following = serializers.SerializerMethodField()
+    #is_open = serializers.SerializerMethodField()
 
     class Meta:
         model = UserProfile
         fields = ('nickname', 'profile_image', 'bio',
                   'phone', 'like_posts',
-                  'followers_count', 'following_count', 'is_self', 'following')
+                  'followers_count', 'following_count', 'is_self', 'following', 'is_private')
+        # 'is_open'
 
     def get_is_self(self, user):
         if 'request' in self.context:
@@ -76,6 +78,18 @@ class UserProfileSerializer(serializers.ModelSerializer):
             if obj in request.user.profile.following.all():
                 return True
         return False
+
+    # def get_is_open(self, user):
+    #     if 'request' in self.context:
+    #         request = self.context['request']
+    #         if user.is_private:
+    #             if user.followers.filter(user=request.user).exists() or user.id == request.user.id:
+    #                 return True
+    #             else:
+    #                 return False
+    #         else:
+    #             return True
+    #     return False
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
